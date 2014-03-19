@@ -11,10 +11,10 @@ function Widget(options) {
   var app = express()
     , defaultOptions =
       { port: process.env.PORT || 3000
-      , viewPath: process.cwd() + '/views'
+      , viewPath: path.join(process.cwd(), 'views')
       , viewEngine: 'jade'
       , favicon: express.favicon()
-      , staticPath: process.cwd() + '/public'
+      , staticPath: path.join(process.cwd(), 'public')
       , logger: express.logger('dev')
       , autoStart: true
       }
@@ -34,7 +34,7 @@ function Widget(options) {
   app.use(express.urlencoded())
   app.use(express.methodOverride())
   app.use(app.router)
-  app.use(express.static(path.normalize('public')))
+  app.use(express.static(options.staticPath))
 
   // development only
   if ('development' === app.get('env')) {

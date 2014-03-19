@@ -1,6 +1,6 @@
 {
   "name": "hud-widget",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "An optional base to use for Project-Hud widgets",
   "main": "hud-widget.js",
   "publishConfig": {

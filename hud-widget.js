@@ -2,6 +2,7 @@ var express = require('express')
   , http = require('http')
   , path = require('path')
   , extend = require('lodash.assign')
+  , uberCacheExpress = require('uber-cache-express')
 
 module.exports = Widget
 
@@ -19,6 +20,8 @@ function Widget(options) {
       }
 
   options = extend({}, defaultOptions, options)
+
+  this._cache = uberCacheExpress(options.cacheOptions)
 
   app.set('port', options.port)
   app.set('views', options.viewPath)
@@ -58,6 +61,12 @@ Widget.prototype.start = function (cb) {
 Object.defineProperty(Widget.prototype, 'app',
   { get: function() {
       return this._app
+    }
+  })
+
+Object.defineProperty(Widget.prototype, 'cache',
+  { get: function() {
+      return this._cache
     }
   })
 

@@ -3,6 +3,10 @@ var express = require('express')
   , path = require('path')
   , extend = require('lodash.assign')
   , uberCacheExpress = require('uber-cache-express')
+  , async = require('async')
+  , events = require('events')
+  , util = require('util')
+  , defaultBuildTasks = require('./lib/default-build-tasks')
 
 module.exports = Widget
 
@@ -17,9 +21,10 @@ function Widget(options) {
       , staticPath: path.join(process.cwd(), 'public')
       , logger: express.logger('dev')
       , autoStart: true
+      , buildTasks: defaultBuildTasks
       }
 
-  options = extend({}, defaultOptions, options)
+  this.options = options = extend({}, defaultOptions, options)
 
   this._cache = uberCacheExpress(options.cacheOptions)
 
@@ -43,16 +48,32 @@ function Widget(options) {
 
   this._app = app
 
-  if (options.autoStart) {
-    process.nextTick(function () {
-      this.start()
-    }.bind(this))
-  }
+  events.EventEmitter.call(this)
+
+  var tasks = []
+    , buildTasks = options.buildTasks(this)
+
+  Object.keys(buildTasks).forEach(function (task) {
+    if (task) tasks.push(buildTasks[task])
+  })
+
+  async.parallel(tasks, function () {
+    this.emit('buildComplete')
+    if (options.autoStart) {
+      process.nextTick(function () {
+        this.start()
+      }.bind(this))
+    }
+  }.bind(this))
 }
+
+util.inherits(Widget, events.EventEmitter)
 
 Widget.prototype.start = function (cb) {
   http.createServer(this._app).listen(this._app.get('port'), function() {
     console.log('Hud Widget server listening on port ' + this._app.get('port'))
+
+    this.emit('started')
 
     if (cb) cb()
   }.bind(this))

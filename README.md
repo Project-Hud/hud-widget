@@ -17,6 +17,7 @@ widget.get('/', function (req, res) {
 ## Methods
 - `get` Exposes express get
 - `start` Starts the server
+- `cache(ttl)` Caches the route output, used as a middleware
 
 ## Options
 - `port` (`Integer`): Port to run the service on. Defaults to the PORT env if set `3000`

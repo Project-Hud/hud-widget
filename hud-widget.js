@@ -7,6 +7,7 @@ var express = require('express')
   , events = require('events')
   , util = require('util')
   , defaultBuildTasks = require('./lib/default-build-tasks')
+  , buildStaticMap = require('./lib/build-static-map')
 
 module.exports = Widget
 
@@ -25,27 +26,7 @@ function Widget(options) {
       }
 
   this.options = options = extend({}, defaultOptions, options)
-
   this._cache = uberCacheExpress(options.cacheOptions)
-
-  app.set('port', options.port)
-  app.set('views', options.viewPath)
-  app.set('view engine', options.viewEngine)
-
-  if (options.favicon) app.use(options.favicon)
-
-  app.use(options.logger)
-  app.use(express.json())
-  app.use(express.urlencoded())
-  app.use(express.methodOverride())
-  app.use(app.router)
-  app.use(express.static(options.staticPath))
-
-  // development only
-  if ('development' === app.get('env')) {
-    app.use(express.errorHandler())
-  }
-
   this._app = app
 
   events.EventEmitter.call(this)
@@ -58,13 +39,37 @@ function Widget(options) {
   })
 
   async.parallel(tasks, function () {
-    this.emit('buildComplete')
-    if (options.autoStart) {
-      process.nextTick(function () {
-        this.start()
-      }.bind(this))
-    }
+
+    buildStaticMap(this, function () {
+
+      this.emit('buildComplete')
+
+      app.set('port', options.port)
+      app.set('views', options.viewPath)
+      app.set('view engine', options.viewEngine)
+
+      if (options.favicon) app.use(options.favicon)
+
+      app.use(options.logger)
+      app.use(express.json())
+      app.use(express.urlencoded())
+      app.use(express.methodOverride())
+      app.use(app.router)
+      app.use(express.static(options.staticPath, { maxAge: 2592000000 }))
+
+      // development only
+      if ('development' === app.get('env')) {
+        app.use(express.errorHandler())
+      }
+
+      if (options.autoStart) {
+        process.nextTick(function () {
+          this.start()
+        }.bind(this))
+      }
+    }.bind(this))
   }.bind(this))
+
 }
 
 util.inherits(Widget, events.EventEmitter)

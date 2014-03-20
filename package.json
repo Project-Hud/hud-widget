@@ -41,6 +41,7 @@
     "stylus": "0.42.0",
     "stylus-renderer": "1.0.0",
     "glob": "~3.2.9",
-    "async": "~0.2.10"
+    "async": "~0.2.10",
+    "versionator": "~0.4.0"
   }
 }

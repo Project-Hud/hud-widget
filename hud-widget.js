@@ -75,7 +75,9 @@ function Widget(options) {
 util.inherits(Widget, events.EventEmitter)
 
 Widget.prototype.start = function (cb) {
-  http.createServer(this._app).listen(this._app.get('port'), function() {
+  this.server = http.createServer(this._app)
+
+  this.server.listen(this._app.get('port'), function() {
     console.log('Hud Widget server listening on port ' + this._app.get('port'))
 
     this.emit('started')

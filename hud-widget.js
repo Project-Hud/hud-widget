@@ -78,7 +78,7 @@ Widget.prototype.start = function (cb) {
   this.server = http.createServer(this._app)
 
   this.server.listen(this._app.get('port'), function() {
-    console.log('Hud Widget server listening on port ' + this._app.get('port'))
+    console.log('Hud Widget server listening on http://localhost:' + this._app.get('port'))
 
     this.emit('started')
 
